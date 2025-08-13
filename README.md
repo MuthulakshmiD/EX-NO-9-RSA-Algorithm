@@ -41,68 +41,46 @@ Name:Muthulakshmi D
 Reg:212223040122
 
 ```
-def gcd(a, b):
-    while b != 0:
-        a, b = b, a % b
+#### 9 RSA
+def gcd(a,b):
+    while b: a,b = b, a%b
     return a
 
-def mod_exp(base, exp, mod):
-    result = 1
-    while exp > 0:
-        if exp % 2 == 1:
-            result = (result * base) % mod
-        base = (base * base) % mod
-        exp = exp // 2
-    return result
+def mod_exp(b,e,m):
+    r=1
+    while e:
+        if e&1: r=(r*b)%m
+        b=(b*b)%m
+        e>>=1
+    return r
 
-def mod_inverse(e, phi):
-    t, newt = 0, 1
-    r, newr = phi, e
-    while newr != 0:
-        quotient = r // newr
-        t, newt = newt, t - quotient * newt
-        r, newr = newr, r - quotient * newr
-    if r > 1:
-        return -1  # No modular inverse
-    if t < 0:
-        t += phi
-    return t
+def mod_inv(e,phi):
+    t,newt=0,1
+    r,newr=phi,e
+    while newr:
+        q=r//newr
+        t,newt=newt,t-q*newt
+        r,newr=newr,r-q*newr
+    return t+phi if t<0 else t if r==1 else -1
 
-p = 61
-q = 53
+p,q=61,53
+n=p*q
+phi=(p-1)*(q-1)
+e=17
+if gcd(e,phi)!=1: exit("e and phi not coprime")
 
-n = p * q
-phi = (p - 1) * (q - 1)
+d=mod_inv(e,phi)
+if d==-1: exit("No modular inverse")
 
-e = 17
-if gcd(e, phi) != 1:
-    print("e and phi(n) are not coprime!")
-    exit()
+print(f"Public Key: (e={e}, n={n})")
+print(f"Private Key: (d={d}, n={n})")
 
-d = mod_inverse(e, phi)
-if d == -1:
-    print("No modular inverse found for e!")
-    exit()
+msg=input("Message: ")
+enc=[mod_exp(ord(c), e, n) for c in msg]
+print("Encrypted:", *enc)
 
-print(f"Public Key: (e = {e}, n = {n})")
-print(f"Private Key: (d = {d}, n = {n})")
+print("Decrypted:", ''.join(chr(mod_exp(c, d, n)) for c in enc))
 
-message = input("Enter a message to encrypt (alphabetic characters only): ")
-
-print("\nEncrypted Message:")
-encrypted = []
-for char in message:
-    m = ord(char)
-    c = mod_exp(m, e, n)
-    encrypted.append(c)
-    print(c, end=' ')
-print()
-
-print("\nDecrypted Message:")
-for c in encrypted:
-    m = mod_exp(c, d, n)
-    print(chr(m), end='')
-print()
 ```
 
 
